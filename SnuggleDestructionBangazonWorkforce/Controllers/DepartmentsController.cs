@@ -10,11 +10,11 @@ using SnuggleDestructionBangazonWorkforce.Models;
 
 namespace SnuggleDestructionBangazonWorkforce.Controllers
 {
-    public class DepartmentController : Controller
+    public class DepartmentsController : Controller
     {
         private readonly IConfiguration _config;
 
-        public DepartmentController(IConfiguration config)
+        public DepartmentsController(IConfiguration config)
         {
             _config = config;
         }
@@ -51,7 +51,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            Budget = reader.GetDecimal(reader.GetOrdinal("Budget"))
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
                         });
                     }
 
@@ -162,7 +162,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            Budget = reader.GetDecimal(reader.GetOrdinal("Budget"))
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
                         };
                     }
 
