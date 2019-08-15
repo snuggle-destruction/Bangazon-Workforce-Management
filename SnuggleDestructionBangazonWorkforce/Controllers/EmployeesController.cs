@@ -67,7 +67,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Employees/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var employee = GetOneEmplyee(id);
+            return View(employee);
         }
 
         // GET: Employees/Create
@@ -139,7 +140,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
         }
 
-        private Employee GetOneEmplyee()
+        private Employee GetOneEmplyee(int id)
         {
             Employee employee = null;
 
@@ -151,9 +152,10 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                     cmd.CommandText = @"
                         SELECT Id, FirstName, LastName, DepartmentId, IsSupervisor
                         FROM Employee
-                        WHERE Id
+                        WHERE Id = @id
                         ";
 
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
 
