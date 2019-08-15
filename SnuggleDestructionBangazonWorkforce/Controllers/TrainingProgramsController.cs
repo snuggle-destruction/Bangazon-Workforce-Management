@@ -66,7 +66,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: TrainingPrograms/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var trainingProgram = GetSingleTrainingProgram(id);
+            return View(trainingProgram);
         }
 
         // GET: TrainingPrograms/Create
@@ -136,6 +137,40 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             {
                 return View();
             }
+        }
+
+        public TrainingProgram GetSingleTrainingProgram(int id)
+        {
+            TrainingProgram trainingProgram = null;
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, [Name], StartDate, EndDate, MaxAttendees
+                        FROM TrainingProgram
+                        WHERE Id = @id
+                    ";
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        trainingProgram = new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
+                        };
+                    }
+                    reader.Close();
+                }
+            }
+            return trainingProgram;
         }
     }
 }
