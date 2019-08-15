@@ -138,5 +138,43 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 return View();
             }
         }
+
+        private Employee GetOneEmplyee()
+        {
+            Employee employee = null;
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, FirstName, LastName, DepartmentId, IsSupervisor
+                        FROM Employee
+                        WHERE Id
+                        ";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+
+
+                    while (reader.Read())
+                    {
+                        employee = new Employee
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                            IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
+                        };
+                    }
+
+                    reader.Close();
+                }
+            }
+
+            return (employee);
+        }
     }
 }
