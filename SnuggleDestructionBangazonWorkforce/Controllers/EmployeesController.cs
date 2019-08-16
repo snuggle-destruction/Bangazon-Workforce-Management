@@ -125,11 +125,38 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // POST: Employees/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Employee employee)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                                   INSERT INTO Employee (
+                                   FirstName,
+                                   LastName,
+                                   IsSupervisor,
+                                   DepartmentId
+                                  )  Values (
+                                    @firstName,
+                                    @lastName,
+                                    @isSupervisor,
+                                    @departmentId
+                                   )
+                                ";
+
+                        cmd.Parameters.AddWithValue("@firstName", employee.FirstName);
+                        cmd.Parameters.AddWithValue("@lastName", employee.LastName);
+                        cmd.Parameters.AddWithValue("@isSupervisor", employee.IsSupervisor);
+                        cmd.Parameters.AddWithValue("@departmentId", employee.DepartmentId);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
