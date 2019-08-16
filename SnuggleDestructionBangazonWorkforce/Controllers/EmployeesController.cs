@@ -169,6 +169,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Employees/Edit/5
         public ActionResult Edit(int id)
         {
+            var employee = GetOneEmplyee(id);
             return View();
         }
 
