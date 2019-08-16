@@ -152,7 +152,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // POST: Computers/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, Computer computer)
+        public ActionResult Delete(Computer computer)
         {
             try
             {
@@ -165,11 +165,14 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                         DELETE FROM Computer
                         WHERE Id = @id
                     ";
-                        cmd.Parameters.AddWithValue("@id", id);
+
+                        cmd.Parameters.AddWithValue("@id", computer.Id);
+                        cmd.ExecuteNonQuery();
                     }
                 }
 
                 return RedirectToAction(nameof(Index));
+
             }
             catch
             {
