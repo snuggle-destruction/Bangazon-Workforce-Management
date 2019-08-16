@@ -30,7 +30,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Departments
         public ActionResult Index()
         {
-            List<DepartmentDisplayViewModel> departments = new List<DepartmentDisplayViewModel>();
+            List<Department> departments = new List<Department>();
 
             using (SqlConnection conn = Connection)
             {
@@ -49,7 +49,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                     while (reader.Read())
                     {
-                        departments.Add(new DepartmentDisplayViewModel()
+                        departments.Add(new Department()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
@@ -68,70 +68,75 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Departments/Details/5
         public ActionResult Details(int id)
         {
-            Department department = GetOneDepartment(id);
-            return View(department);
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT d.Id, d.[Name], d.[Budget], e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor
+                                        FROM Department AS d
+                                        LEFT JOIN Employee AS e ON e.DepartmentId = d.Id
+                                        Where d.Id = @id";
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    Department department = new Department();
+                    List<Employee> employees = new List<Employee>();
+
+                    while (reader.Read())
+                    {
+                        {
+                            department = new Department
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                            };
+                            employees.Add(new Employee()
+                            {
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"))
+                            });
+                        }
+                    }
+                    department.Employees = employees;
+                    return View(department);
+                }
+            }
         }
 
-        // GET: Departments/Create
+
         public ActionResult Create()
         {
             return View();
         }
-
         // POST: Departments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Department department)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                            INSERT INTO Department ([Name], Budget)
+                            VALUES (@name, @budget);
+                        ";
 
-        // GET: Departments/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
+                        cmd.Parameters.AddWithValue("@name", department.Name);
+                        cmd.Parameters.AddWithValue("@budget", department.Budget);
+                        
 
-        // POST: Departments/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: Departments/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Departments/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
