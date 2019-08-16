@@ -168,6 +168,11 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Computers By Search
         public ActionResult SearchComputers(IFormCollection search)
         {
+            if(string.IsNullOrEmpty(search["SearchString"][0]))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
             List<Computer> computers = new List<Computer>();
             using (SqlConnection conn = Connection)
             {
