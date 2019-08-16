@@ -120,8 +120,9 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         public ActionResult Edit(int id)
         {
             var trainingProgram = GetSingleTrainingProgram(id);
+            DateTime currentDate = DateTime.Now;
 
-            if (trainingProgram.StartDate > DateTime.Now)
+            if (trainingProgram.StartDate > currentDate)
             {
                 return View(trainingProgram);
             }
@@ -136,13 +137,36 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // POST: TrainingPrograms/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, TrainingProgram trainingProgram)
         {
             try
             {
-                // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                                            UPDATE TrainingProgram
+                                            SET 
+                                            [Name] = @name,
+                                            StartDate = @startDate,
+                                            EndDate = @endDate,
+                                            MaxAttendees = @maxAttendees
+                                            WHERE Id = @id
+                                            ";
 
-                return RedirectToAction(nameof(Index));
+                        cmd.Parameters.AddWithValue("@id", id);
+                        cmd.Parameters.AddWithValue("@name", trainingProgram.Name);
+                        cmd.Parameters.AddWithValue("@startDate", trainingProgram.StartDate);
+                        cmd.Parameters.AddWithValue("@endDate", trainingProgram.EndDate);
+                        cmd.Parameters.AddWithValue("@maxAttendees", trainingProgram.MaxAttendees);
+
+                        cmd.ExecuteNonQuery();
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
             }
             catch
             {
@@ -153,23 +177,51 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: TrainingPrograms/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var trainingProgram = GetSingleTrainingProgram(id);
+            var currentDate = DateTime.Now;
+
+            if (trainingProgram.StartDate > currentDate)
+            {
+                return View(trainingProgram);
+            }
+            else
+            {
+                throw new Exception("NOPE!");
+            }
         }
 
         // POST: TrainingPrograms/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, TrainingProgram trainingProgram)
         {
             try
             {
-                // TODO: Add delete logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        // this sql command should remove all tables that the program relates to inside EmployeeTraining
+                        // then it will delete the actual program
+                        cmd.CommandText = @"
+                                            DELETE FROM EmployeeTraining
+                                            WHERE TrainingProgramId = @id;
 
-                return RedirectToAction(nameof(Index));
+                                            DELETE FROM TrainingProgram
+                                            WHERE Id = @id AND StartDate > CURRENT_TIMESTAMP;
+                                            ";
+
+                        cmd.Parameters.AddWithValue("@id", id);
+
+                        cmd.ExecuteNonQuery();
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
             }
             catch
             {
-                return View();
+                throw new Exception("nah, dawg");
             }
         }
 
@@ -220,9 +272,11 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                                         SELECT e.Id, e.FirstName, e.LastName FROM Employee e
                                         JOIN EmployeeTraining et ON et.EmployeeId = e.Id
                                         JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
-                                        WHERE tp.Id = 5
+                                        WHERE tp.Id = @id
                                         ORDER BY e.Id ASC;
                                         ";
+
+                    cmd.Parameters.AddWithValue("@id", id);
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
