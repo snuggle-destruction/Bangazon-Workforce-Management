@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace SnuggleDestructionBangazonWorkforce.Models.ViewModels
 {
-    public class ComputerTrainingProgramViewModel
+    public class EmployeeTrainingProgramViewModel
     {
         public List<TrainingProgram> TrainingProgram { get; set; }
         public List<Employee> Employee { get; set; }
