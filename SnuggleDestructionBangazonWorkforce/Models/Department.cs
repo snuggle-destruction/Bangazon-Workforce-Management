@@ -20,6 +20,10 @@ namespace SnuggleDestructionBangazonWorkforce.Models
         [Display(Name = "Budget :")]
         public int Budget { get; set; }
 
+        [Required]
+        [Display(Name = "Number of Employees")]
+        public int DepartmentSize { get; set; }
+
         public List<Employee> Employees { get; set; }
 
     }

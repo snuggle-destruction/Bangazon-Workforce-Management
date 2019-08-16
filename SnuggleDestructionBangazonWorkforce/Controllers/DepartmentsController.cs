@@ -30,7 +30,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Departments
         public ActionResult Index()
         {
-            List<DepartmentDisplayViewModel> departments = new List<DepartmentDisplayViewModel>();
+            List<Department> departments = new List<Department>();
 
             using (SqlConnection conn = Connection)
             {
@@ -49,7 +49,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                     while (reader.Read())
                     {
-                        departments.Add(new DepartmentDisplayViewModel()
+                        departments.Add(new Department()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
