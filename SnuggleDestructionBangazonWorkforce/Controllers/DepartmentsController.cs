@@ -65,7 +65,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Departments/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            Department department = GetOneDepartment(id);
+            return View(department);
         }
 
         // GET: Departments/Create
@@ -137,7 +138,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
         }
 
-        private Department GetOneDepartment()
+        private Department GetOneDepartment(int id)
         {
             Department department = null;
 
