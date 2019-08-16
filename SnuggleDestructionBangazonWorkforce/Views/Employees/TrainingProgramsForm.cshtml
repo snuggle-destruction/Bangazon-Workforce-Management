@@ -24,6 +24,11 @@
                 @Html.DisplayFor(model => model.Department.Name)
             </dd>
         </dl>
+        /@* <div class="form-group">
+                <label asp-for="Student.CohortId" class="control-label"></label>
+                @Html.DropDownListFor(model => model.Student.CohortId, Model.Cohorts);
+                <span asp-validation-for="Student.CohortId" class="text-danger"></span>
+            </div> *@
         <form asp-action="TrainingProgramsForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
