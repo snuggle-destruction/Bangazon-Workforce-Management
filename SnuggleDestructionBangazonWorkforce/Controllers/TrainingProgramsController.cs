@@ -164,7 +164,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                         cmd.ExecuteNonQuery();
 
-                        return RedirectToAction(nameof(Details));
+                        return RedirectToAction(nameof(Index));
                     }
                 }
             }
