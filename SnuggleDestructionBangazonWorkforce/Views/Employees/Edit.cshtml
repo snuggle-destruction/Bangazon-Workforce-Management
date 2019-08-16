@@ -20,11 +20,15 @@
                 <label asp-for="Departments" class="control-label"></label>
                 <select asp-for="Employee.DepartmentId" asp-items="@Model.Departments"></select>
             </div>
-      
+            @if(Model.Computer != null)
+            { 
             <div class="form-group">
                 <label asp-for="Computers" class="control-label"></label>
                 <select asp-for="Computer.Id" asp-items="@Model.Computers"></select>
             </div>
+            } else
+            {
+                <p>No Computer Assigned</p>
             }
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
