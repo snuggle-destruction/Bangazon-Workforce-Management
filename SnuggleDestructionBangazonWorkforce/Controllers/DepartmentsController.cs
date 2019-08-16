@@ -86,6 +86,12 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                     while (reader.Read())
                     {
                         {
+                            department = new Department
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                            };
                             employees.Add(new Employee()
                             {
                                 FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
