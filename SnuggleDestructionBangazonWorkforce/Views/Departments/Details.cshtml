@@ -14,14 +14,25 @@
             @Html.DisplayNameFor(model => model.Id)
         </dt>
         <dd>
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd>
             @Html.DisplayFor(model => model.Name)
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.Budget)
         </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Budget)
+        </dd>
+        
     </dl>
 </div>
 <div>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
     <a asp-action="Index">Back to List</a>
 </div>
+

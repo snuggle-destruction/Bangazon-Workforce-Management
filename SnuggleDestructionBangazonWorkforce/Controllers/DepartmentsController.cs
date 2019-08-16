@@ -140,38 +140,34 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
         private Department GetOneDepartment(int id)
         {
-            Department department = null;
-
             using (SqlConnection conn = Connection)
             {
+                Department department = null;
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
                         SELECT Id, Name, Budget
                         FROM Department
-                        WHERE Id
-                        ";
+                        WHERE Id = @id
+                    ";
 
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
-
-
-                    while (reader.Read())
+                    if (reader.Read())
                     {
-                        department = new Department
+                        department = new Department()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                           
                         };
                     }
-
-                    reader.Close();
                 }
+                return department;
             }
-
-            return (department);
         }
     }
 }
