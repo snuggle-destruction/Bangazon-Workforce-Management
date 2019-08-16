@@ -214,50 +214,53 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
 
         // Get Training Programs
-        //public ActionResult GetTrainingProgramsDrop(int id)
-        //{
-        //    var viewModel = new EmployeeTrainingProgramViewModel();
-        //    viewModel.TrainingProgram = trainingList();
-        //    return View(viewModel);
-        //}
+        public ActionResult TrainingProgramsForm(int id)
+        {
+            var viewModel = new EmployeeTrainingProgramViewModel();
+            viewModel.TrainingProgramList = trainingList(id);
+            return View(viewModel);
+        }
 
-        //// Assign Training Program to Employee
-        //public ActionResult AssignTrainingProgram(Employee employee, TrainingProgram trainingProgram)
-        //{
-        //    List<Employee> employees = new List<Employee>();
+        // Assign Training Program to Employee
+        // move to training program controller
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AssignTrainingProgram(Employee employee, TrainingProgram trainingProgram)
+        {
+            List<Employee> employees = new List<Employee>();
 
-        //    using (SqlConnection conn = Connection)
-        //    {
-        //        conn.Open();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
 
-        //        using (SqlCommand cmd = conn.CreateCommand())
-        //        {
-        //            cmd.CommandText = @"DECLARE @trainingProgramId int = 0;
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"DECLARE @trainingProgramId int = 0;
 
-        //                                SELECT TOP 1 @trainingProgramId = tp.Id 
-        //                                FROM TrainingProgram tp 
-        //                                WHERE tp.Name = @trainingProgramName
-        //                                IF @trainingProgramId > 0
-        //                                BEGIN
+                                        SELECT TOP 1 @trainingProgramId = tp.Id 
+                                        FROM TrainingProgram tp 
+                                        WHERE tp.Name = @trainingProgramName
+                                        IF @trainingProgramId > 0
+                                        BEGIN
 
-        //                                INSERT INTO EmployeeTraining (TrainingProgramId, EmployeeId)
-        //                                SELECT @trainingProgramId, e.Id 
-        //                                FROM Employee e
-        //                                WHERE e.Id = @employeeId
+                                        INSERT INTO EmployeeTraining (TrainingProgramId, EmployeeId)
+                                        SELECT @trainingProgramId, e.Id 
+                                        FROM Employee e
+                                        WHERE e.Id = @employeeId
 
-        //                                END";
+                                        END";
 
-        //            //shelley work here
-        //            cmd.Parameters.Add(new SqlParameter("@trainingProgramId", trainingProgram.Id));
-        //            cmd.Parameters.Add(new SqlParameter("@employeeId", employee.Id));
+                    //shelley work here
+                    cmd.Parameters.Add(new SqlParameter("@trainingProgramId", trainingProgram.Id));
+                    cmd.Parameters.Add(new SqlParameter("@employeeId", employee.Id));
 
-        //            cmd.ExecuteNonQuery();
+                    cmd.ExecuteNonQuery();
 
-        //        }
-        //    }
+                }
+            }
 
-        //    return View(employees);
-        //}
+            return View(employees);
+        }
 
         private Employee GetOneEmplyee(int id)
         {
@@ -448,23 +451,23 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             return (departments);
         }
 
-        //private List<SelectListItem> trainingList()
-        //{
-        //    var trainingProgram = GetTrainingPrograms();
-        //    var selectItems = trainingProgram
-        //        .Select(program => new SelectListItem
-        //        {
-        //            Text = program.Name,
-        //            Value = program.Id.ToString()
-        //        })
-        //        .ToList();
+        private List<SelectListItem> trainingList(int id)
+        {
+            var trainingProgram = GetTrainingPrograms(id);
+            var selectItems = trainingProgram
+                .Select(program => new SelectListItem
+                {
+                    Text = program.Name,
+                    Value = program.Id.ToString()
+                })
+                .ToList();
 
-        //    selectItems.Insert(0, new SelectListItem
-        //    {
-        //        Text = "Choose training program...",
-        //        Value = "0"
-        //    });
-        //    return selectItems;
-        //}
+            selectItems.Insert(0, new SelectListItem
+            {
+                Text = "Choose training program...",
+                Value = "0"
+            });
+            return selectItems;
+        }
     }
 }
