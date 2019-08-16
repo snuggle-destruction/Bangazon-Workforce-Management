@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SnuggleDestructionBangazonWorkforce.Models;
+using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
 
 namespace SnuggleDestructionBangazonWorkforce.Controllers
 {
@@ -29,6 +30,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Employees
         public ActionResult Index()
         {
+
             List<Employee> employees = new List<Employee>();
 
             using (SqlConnection conn = Connection)
@@ -67,11 +69,18 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Employees/Details/5
         public ActionResult Details(int id)
         {
+            var viewModel = new EmployeeDisplayViewModel();
+
             var employee = GetOneEmplyee(id);
             var computer = GetComputer(id);
-            employee.Computer = computer;
+            var trainingPrograms = GetTrainingPrograms(id);
+            var department = GetDepartment(id);
+            viewModel.Employee = employee;
+            viewModel.Computer = computer;
+            viewModel.TrainingPrograms = trainingPrograms;
+            viewModel.Department = department;
 
-            return View(employee);
+            return View(viewModel);
         }
 
         // GET: Employees/Create
@@ -219,6 +228,82 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 }
             }
             return computer;
+        }
+
+        private List<TrainingProgram> GetTrainingPrograms(int id)
+        {
+            List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT tp.Id, tp.EndDate, tp.MaxAttendees, tp.Name, tp.StartDate 
+                        FROM EmployeeTraining et
+                        LEFT JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
+                        WHERE et.EmployeeId = @id
+                        ";
+
+                    cmd.Parameters.AddWithValue("@id", id);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        trainingPrograms.Add(new TrainingProgram()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
+                        });
+                    }
+
+                    reader.Close();
+                }
+            }
+
+            return (trainingPrograms);
+        }
+
+        private Department GetDepartment(int id)
+        {
+            Department department = null;
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT d.Id, d.Name, d.Budget
+                        FROM Department d
+                        LEFT JOIN Employee e ON e.DepartmentId = d.Id
+                        WHERE e.id = @id
+                        ";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+
+
+                    if (reader.Read())
+                    {
+                        department = new Department
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                        };
+                    }
+
+                    reader.Close();
+                }
+            }
+
+            return (department);
         }
     }
 }
