@@ -119,7 +119,18 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: TrainingPrograms/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var trainingProgram = GetSingleTrainingProgram(id);
+
+            if (trainingProgram.StartDate > DateTime.Now)
+            {
+                return View(trainingProgram);
+            }
+            else
+            {
+                throw new Exception("NOPE!");
+            }
+
+            
         }
 
         // POST: TrainingPrograms/Edit/5
