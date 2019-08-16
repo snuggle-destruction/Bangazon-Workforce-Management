@@ -153,23 +153,51 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: TrainingPrograms/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var trainingProgram = GetSingleTrainingProgram(id);
+            var currentDate = DateTime.Now;
+
+            if (trainingProgram.StartDate > currentDate)
+            {
+                return View(trainingProgram);
+            }
+            else
+            {
+                throw new Exception("NOPE!");
+            }
         }
 
         // POST: TrainingPrograms/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, TrainingProgram trainingProgram)
         {
             try
             {
-                // TODO: Add delete logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        // this sql command should remove all tables that the program relates to inside EmployeeTraining
+                        // then it will delete the actual program
+                        cmd.CommandText = @"
+                                            DELETE FROM EmployeeTraining
+                                            WHERE TrainingProgramId = @id;
 
-                return RedirectToAction(nameof(Index));
+                                            DELETE FROM TrainingProgram
+                                            WHERE Id = @id AND StartDate > CURRENT_TIMESTAMP;
+                                            ";
+
+                        cmd.Parameters.AddWithValue("@id", id);
+
+                        cmd.ExecuteNonQuery();
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
             }
             catch
             {
-                return View();
+                throw new Exception("nah, dawg");
             }
         }
 
