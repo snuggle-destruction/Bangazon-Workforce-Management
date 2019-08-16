@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SnuggleDestructionBangazonWorkforce.Models;
+using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
 
 namespace SnuggleDestructionBangazonWorkforce.Controllers
 {
@@ -75,7 +76,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Computers/Create
         public ActionResult Create()
         {
-            return View();
+            var viewModel = new ComputerCreateViewModel(_config.GetConnectionString("DefaultConnection"));
+            return View(viewModel);
         }
 
         // POST: Computers/Create
@@ -168,6 +170,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                         cmd.Parameters.AddWithValue("@id", computer.Id);
                         cmd.ExecuteNonQuery();
+
                     }
                 }
 
