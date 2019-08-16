@@ -1,0 +1,92 @@
+﻿@model SnuggleDestructionBangazonWorkforce.Models.ViewModels.EmployeeDisplayViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Employee</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Employee.FullName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Employee.FullName)
+        </dd>
+        <dt>
+            Department
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Department.Name)
+        </dd>
+    </dl>
+    <h4>Computer</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Computer.Id)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Computer.Id)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Computer.Manufacturer)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Computer.Manufacturer)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Computer.Make)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Computer.Make)
+        </dd>
+    </dl>
+    <h4>Training Programs</h4>
+    <hr />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.TrainingProgram.Id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TrainingProgram.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TrainingProgram.StartDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TrainingProgram.EndDate)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.TrainingPrograms)
+            {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div>
+    @Html.ActionLink("Edit", "Edit", new {  id = Model.Employee.Id }) |
+    <a asp-action="Index">Back to List</a>
+</div>
