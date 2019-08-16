@@ -161,7 +161,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
         }
 
-        public ActionResult AssignTrainingProgram(int id, TrainingProgram trainingProgram)
+        public ActionResult AssignTrainingProgram(Employee employee, TrainingProgram trainingProgram)
         {
             List<Employee> employees = new List<Employee>();
 
@@ -171,23 +171,23 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"DECLARE @TrainingProgramId int = 0;
-                                        SELECT TOP 1 @TrainingProgramId = e.Id FROM TrainingProgram tp 
-                                        WHERE tp.Name = @TrainingProgramName
-                                        IF @TrainingProgramId > 0
+                    cmd.CommandText = @"DECLARE @trainingProgramId int = 0;
+                                        SELECT TOP 1 @trainingProgramId = e.Id 
+                                        FROM TrainingProgram tp 
+                                        WHERE tp.Name = @trainingProgramName
+                                        IF @trainingProgramId > 0
                                         BEGIN
+
                                         INSERT INTO EmployeeTraining (TrainingProgramId, EmployeeId)
-                                        SELECT @TrainingProgramId, e.Id 
+                                        SELECT @trainingProgramId, e.Id 
                                         FROM Employee e
-                                        WHERE e.FirstName = @FirstName 
-                                        AND e.LastName = @LastName 
+                                        WHERE e.Id = @employeeId
+
                                         END";
 
                     //shelley work here
-                    cmd.Parameters.Add(new SqlParameter("@FirstName", firstName));
-                    cmd.Parameters.Add(new SqlParameter("@LastName", lastName));
-                    cmd.Parameters.Add(new SqlParameter("@SlackHandle", slackHandle));
-                    cmd.Parameters.Add(new SqlParameter("@exerciseName", exerciseName));
+                    cmd.Parameters.Add(new SqlParameter("@trainingProgramId", trainingProgram.Id));
+                    cmd.Parameters.Add(new SqlParameter("@employeeId", employee.Id));
 
                     cmd.ExecuteNonQuery();
 
@@ -197,7 +197,6 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             return View(employees);
         }
 
-        private Employee GetOneEmplyee()
         private Employee GetOneEmplyee(int id)
         {
             Employee employee = null;
