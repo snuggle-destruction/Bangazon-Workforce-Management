@@ -107,32 +107,37 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
         }
 
+
+        public ActionResult Create()
+        {
+            return View();
+        }
         // POST: Departments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(DepartmentCreateViewModel model)
+        public ActionResult Create(Department department)
         {
             try
             {
                 using (SqlConnection conn = Connection)
                 {
                     conn.Open();
+
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"
-                                            INSERT INTO Department
-                                            ([Name], Budget)
+                            INSERT INTO Department ([Name], Budget)
+                            VALUES (@name, @budget);
+                        ";
 
-                                            VALUES
-                                            (@Name, @Budget)";
-
-                        cmd.Parameters.AddWithValue("@Name", model.Department.Name);
-                        cmd.Parameters.AddWithValue("@Budget", model.Department.Budget);
+                        cmd.Parameters.AddWithValue("@name", department.Name);
+                        cmd.Parameters.AddWithValue("@budget", department.Budget);
+                        
 
                         cmd.ExecuteNonQuery();
                     }
-
                 }
+
                 return RedirectToAction(nameof(Index));
             }
             catch
