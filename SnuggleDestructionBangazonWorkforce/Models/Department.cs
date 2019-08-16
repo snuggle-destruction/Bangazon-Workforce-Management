@@ -9,15 +9,15 @@ namespace SnuggleDestructionBangazonWorkforce.Models
     public class Department
     {
         [Required]
-        [Display(Name = "Department Id:")]
+        [Display(Name = "Department Id :")]
         public int Id { get; set; }
 
         [Required]
-        [Display(Name = "Name")]
+        [Display(Name = "Name :")]
         public string Name { get; set; }
 
         [Required]
-        [Display(Name = "Budget:")]
+        [Display(Name = "Budget :")]
         public int Budget { get; set; }
 
         public List<Employee> Employees { get; set; }
