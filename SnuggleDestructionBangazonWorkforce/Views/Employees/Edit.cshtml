@@ -10,6 +10,9 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
+        <p>@Model.Employee.FirstName</p>
+        <p>Is Supervisor @Model.Employee.IsSupervisor</p>
+        <p>Id @Model.Employee.Id</p>
         <form asp-action="Edit">
             <div class="form-group">
                 <label asp-for="Employee.LastName" class="control-label"></label>

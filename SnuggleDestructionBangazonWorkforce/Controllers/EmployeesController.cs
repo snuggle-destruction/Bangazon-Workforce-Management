@@ -224,30 +224,24 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                     {
                         cmd.CommandText = @"
                                    UPDATE Employee 
-                                    SET FirstName = @firstName,
-                                        LastName = @lastName,
-                                        IsSupervisor = @isSupervisor,
+                                    SET LastName = @lastName,
                                         DepartmentId = @departmentId
-                                    WHERE Id = @id
+                                    WHERE Id = @id;
 
                                     UPDATE ComputerEmployee
                                     Set EmployeeId = @id,
                                         ComputerId = @computerId,
-                                        AssignDate = @assignDate,
-                                        UnassignDate = @unassignDate
+                                        AssignDate = GETDATE(),
+                                        UnassignDate = null
                                     WHERE EmployeeId = @id
                                     ";
 
                                     
 
                         cmd.Parameters.AddWithValue("@id", id);
-                        cmd.Parameters.AddWithValue("@firstName", model.Employee.FirstName);
                         cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
-                        cmd.Parameters.AddWithValue("@isSupervisor", model.Employee.IsSupervisor);
                         cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
                         cmd.Parameters.AddWithValue("@computerId", model.Computer.Id);
-                        cmd.Parameters.AddWithValue("@assignDate", model.Computer.PurchaseDate);
-                        cmd.Parameters.AddWithValue("@unassignDate", model.Computer.DecomissionDate);
 
                         cmd.ExecuteNonQuery();
                     }
