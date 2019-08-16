@@ -69,7 +69,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         public ActionResult Details(int id)
         {
             var trainingProgram = GetSingleTrainingProgram(id);
-            var employees = GetAllEmployees();
+            var employees = GetAllEmployeesInProgram(id);
             var viewModel = new TrainingProgramDetailsViewModel(trainingProgram, employees);
 
             return View(viewModel);
@@ -196,7 +196,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             return trainingProgram;
         }
 
-        private List<Employee> GetAllEmployees()
+        private List<Employee> GetAllEmployeesInProgram(int id)
         {
             List<Employee> employees = new List<Employee>();
 
@@ -206,7 +206,11 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                                        SELECT Id, FullName FROM Employee;
+                                        SELECT e.Id, e.FirstName, e.LastName FROM Employee e
+                                        JOIN EmployeeTraining et ON et.EmployeeId = e.Id
+                                        JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
+                                        WHERE tp.Id = 5
+                                        ORDER BY e.Id ASC;
                                         ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
