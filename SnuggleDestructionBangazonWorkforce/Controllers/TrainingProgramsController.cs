@@ -244,9 +244,11 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                                         SELECT e.Id, e.FirstName, e.LastName FROM Employee e
                                         JOIN EmployeeTraining et ON et.EmployeeId = e.Id
                                         JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
-                                        WHERE tp.Id = 5
+                                        WHERE tp.Id = @id
                                         ORDER BY e.Id ASC;
                                         ";
+
+                    cmd.Parameters.AddWithValue("@id", id);
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
