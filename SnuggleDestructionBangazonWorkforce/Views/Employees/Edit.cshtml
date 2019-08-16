@@ -10,9 +10,6 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <p>@Model.Employee.FirstName</p>
-        <p>Is Supervisor @Model.Employee.IsSupervisor</p>
-        <p>Id @Model.Employee.Id</p>
         <form asp-action="Edit">
             <div class="form-group">
                 <label asp-for="Employee.LastName" class="control-label"></label>
@@ -23,10 +20,12 @@
                 <label asp-for="Departments" class="control-label"></label>
                 <select asp-for="Employee.DepartmentId" asp-items="@Model.Departments"></select>
             </div>
+      
             <div class="form-group">
                 <label asp-for="Computers" class="control-label"></label>
                 <select asp-for="Computer.Id" asp-items="@Model.Computers"></select>
             </div>
+            }
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
             </div>
