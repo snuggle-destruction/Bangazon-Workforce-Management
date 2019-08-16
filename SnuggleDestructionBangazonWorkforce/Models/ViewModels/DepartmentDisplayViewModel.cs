@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BangazonWorkforceManagement.Models.ViewModels
+namespace SnuggleDestructionBangazonWorkforce.Models.ViewModels
 {
     public class DepartmentDisplayViewModel
     {

@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SnuggleDestructionBangazonWorkforce.Models;
+using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
 
 namespace SnuggleDestructionBangazonWorkforce.Controllers
 {
@@ -29,7 +31,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Departments
         public ActionResult Index()
         {
-            List<Department> departments = new List<Department>();
+            List<DepartmentDisplayViewModel> departments = new List<DepartmentDisplayViewModel>();
 
             using (SqlConnection conn = Connection)
             {
