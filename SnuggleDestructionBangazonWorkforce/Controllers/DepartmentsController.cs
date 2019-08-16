@@ -38,9 +38,10 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, Name, Budget
-                        FROM Department
-                        ";
+                        SELECT d.Id, d.Name, d.Budget, COUNT(e.DepartmentId) AS DepartmentSize
+                                          FROM Department AS d
+                                          LEFT JOIN Employee AS e ON d.Id = e.DepartmentId
+                                          ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
