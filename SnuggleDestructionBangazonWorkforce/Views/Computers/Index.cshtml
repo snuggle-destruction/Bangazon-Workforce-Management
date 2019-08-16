@@ -25,6 +25,9 @@
                 @Html.DisplayNameFor(model => model.PurchaseDate)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.Employee)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.DecomissionDate)
             </th>
             <th>
@@ -56,9 +59,13 @@
                 @Html.DisplayFor(modelItem => item.Manufacturer)
             </td>
             <td>
-                
-                @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+                @*@Html.DisplayFor(modelItem => item.Employee.FullName)*@
+                @(item.Employee.FullName == default(string) ? "No Assigned Employee" : item.Employee.FullName)
+            </td>
+            <td>
+
+                @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
             </td>
         </tr>
 }

@@ -31,23 +31,26 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Computers
         public ActionResult Index()
         {
-            List<Computer> computers = new List<Computer>();
+            var computers = new List<Computer>();
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
-                        FROM Computer
+                        SELECT c.Id AS ComputerId, c.PurchaseDate, c.DecomissionDate, c.Make, c.Manufacturer, 
+                            e.Id AS EmployeeId, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor
+                        FROM Computer c
+                        LEFT JOIN ComputerEmployee ce ON c.Id = ce.ComputerId
+                        LEFT JOIN Employee e ON e.Id = ce.EmployeeId
                     ";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        Computer computer = new Computer
+                        var computer = new Computer
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                             PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
                             Make = reader.GetString(reader.GetOrdinal("Make")),
                             Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
@@ -56,6 +59,22 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                         if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
                         {
                             computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
+                        {
+                            computer.EmployeeId = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
+
+                            var employee = new Employee()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor"))
+                            };
+
+                            computer.Employee = employee;
                         }
 
                         computers.Add(computer);
