@@ -42,8 +42,9 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, FirstName, LastName, DepartmentId, IsSupervisor
-                        FROM Employee
+                        SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor, d.Name, d.Id As DeptId, d.Budget
+                        FROM Employee e
+                        LEFT JOIN Department d ON d.Id = e.DepartmentId
                         ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -61,8 +62,13 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                             DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                             IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
                         };
+                        var department = new Department()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("DeptId")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                        };
                         viewModel.Employee = employee;
-                        var department = GetDepartment(reader.GetInt32(reader.GetOrdinal("Id")));
                         viewModel.Department = department;
                         models.Add(viewModel);
                     }
