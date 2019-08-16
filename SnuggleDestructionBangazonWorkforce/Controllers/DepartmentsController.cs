@@ -77,21 +77,28 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                                         FROM Department AS d
                                         LEFT JOIN Employee AS e ON e.DepartmentId = d.Id
                                         Where d.Id = @id";
-                    
+                    cmd.Parameters.AddWithValue("@id", id);
 
                     SqlDataReader reader = cmd.ExecuteReader();
+                    Department department = new Department();
                     List<Employee> employees = new List<Employee>();
 
-                    public ActionResult Details(int id)
+                    while (reader.Read())
                     {
-                        Department department = GetOneDepartment(id);
-                        return View(department);
+                        {
+                            employees.Add(new Employee()
+                            {
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"))
+                            });
+                        }
                     }
-
-                    // GET: Departments/Create
-                    public ActionResult Create()
-        {
-            return View();
+                    department.Employees = employees;
+                    return View(department);
+                }
+            }
         }
 
         // POST: Departments/Create
