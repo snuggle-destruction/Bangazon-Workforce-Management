@@ -40,7 +40,8 @@
                 @Html.DisplayFor(modelItem => item.PurchaseDate)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.DecomissionDate)
+                @*@Html.DisplayFor(modelItem => item.DecomissionDate)*@
+                @(item.DecomissionDate == default(DateTime) ? "Active" : item.DecomissionDate.ToShortDateString())
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Make)
