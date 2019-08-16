@@ -212,6 +212,42 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
         }
 
+        public ActionResult AssignTrainingProgram(Employee employee, TrainingProgram trainingProgram)
+        {
+            List<Employee> employees = new List<Employee>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"DECLARE @trainingProgramId int = 0;
+                                        SELECT TOP 1 @trainingProgramId = e.Id 
+                                        FROM TrainingProgram tp 
+                                        WHERE tp.Name = @trainingProgramName
+                                        IF @trainingProgramId > 0
+                                        BEGIN
+
+                                        INSERT INTO EmployeeTraining (TrainingProgramId, EmployeeId)
+                                        SELECT @trainingProgramId, e.Id 
+                                        FROM Employee e
+                                        WHERE e.Id = @employeeId
+
+                                        END";
+
+                    //shelley work here
+                    cmd.Parameters.Add(new SqlParameter("@trainingProgramId", trainingProgram.Id));
+                    cmd.Parameters.Add(new SqlParameter("@employeeId", employee.Id));
+
+                    cmd.ExecuteNonQuery();
+
+                }
+            }
+
+            return View(employees);
+        }
+
         private Employee GetOneEmplyee(int id)
         {
             Employee employee = null;
