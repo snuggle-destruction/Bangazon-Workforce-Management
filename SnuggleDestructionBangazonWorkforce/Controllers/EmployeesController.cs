@@ -68,6 +68,9 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         public ActionResult Details(int id)
         {
             var employee = GetOneEmplyee(id);
+            var computer = GetComputer(id);
+            employee.Computer = computer;
+
             return View(employee);
         }
 
@@ -160,7 +163,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
 
 
-                    while (reader.Read())
+                    if (reader.Read())
                     {
                         employee = new Employee
                         {
@@ -177,6 +180,45 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
 
             return (employee);
+        }
+
+        private Computer GetComputer(int id)
+        {
+            Computer computer = null;
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT c.Id, c.DecomissionDate, c.Make, c.Manufacturer, c.PurchaseDate
+                        FROM ComputerEmployee ce
+                        LEFT JOIN Computer c ON c.Id = ce.ComputerId 
+                        WHERE ce.EmployeeId = @id
+                    ";
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        };
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+                    }
+                    reader.Close();
+                }
+            }
+            return computer;
         }
     }
 }

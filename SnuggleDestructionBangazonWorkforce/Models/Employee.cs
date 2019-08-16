@@ -28,6 +28,10 @@ namespace SnuggleDestructionBangazonWorkforce.Models
         [Display(Name = "Is Supervisor")]
         public bool IsSupervisor { get; set; }
 
+        public Computer Computer { get; set; }
+
+        public TrainingProgram Training { get; set; }
+
         [Display(Name = "Full Name")]
         public string FullName
         {

@@ -22,17 +22,27 @@
         <dd>
             @Html.DisplayFor(model => model.FullName)
         </dd>
+    </dl>
+    <h5>Computer</h5>
+    <hr />
+    <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.DepartmentId)
+            @Html.DisplayNameFor(model => model.Computer.Id)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.DepartmentId)
+            @Html.DisplayFor(model => model.Computer.Id)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.IsSupervisor)
+            @Html.DisplayNameFor(model => model.Computer.Manufacturer)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.IsSupervisor)
+            @Html.DisplayFor(model => model.Computer.Manufacturer)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Computer.Make)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Computer.Make)
         </dd>
     </dl>
 </div>
