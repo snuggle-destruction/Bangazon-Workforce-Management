@@ -39,6 +39,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                     cmd.CommandText = @"
                         SELECT Id, [Name], StartDate, EndDate, MaxAttendees
                         FROM TrainingProgram
+                        WHERE StartDate > CURRENT_TIMESTAMP
                         ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -65,7 +66,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: TrainingPrograms/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var trainingProgram = GetSingleTrainingProgram(id);
+            return View(trainingProgram);
         }
 
         // GET: TrainingPrograms/Create
@@ -77,11 +79,29 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // POST: TrainingPrograms/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(TrainingProgram trainingProgram)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                            INSERT INTO TrainingProgram ([Name], StartDate, EndDate, MaxAttendees)
+                            VALUES (@name, @startDate, @endDate, @maxAttendees);
+                        ";
+
+                        cmd.Parameters.AddWithValue("@name", trainingProgram.Name);
+                        cmd.Parameters.AddWithValue("@startDate", trainingProgram.StartDate);
+                        cmd.Parameters.AddWithValue("@endDate", trainingProgram.EndDate);
+                        cmd.Parameters.AddWithValue("@maxAttendees", trainingProgram.MaxAttendees);
+                        
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
@@ -135,6 +155,40 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             {
                 return View();
             }
+        }
+
+        public TrainingProgram GetSingleTrainingProgram(int id)
+        {
+            TrainingProgram trainingProgram = null;
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, [Name], StartDate, EndDate, MaxAttendees
+                        FROM TrainingProgram
+                        WHERE Id = @id
+                    ";
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        trainingProgram = new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
+                        };
+                    }
+                    reader.Close();
+                }
+            }
+            return trainingProgram;
         }
     }
 }
