@@ -9,8 +9,6 @@ namespace SnuggleDestructionBangazonWorkforce.Models.ViewModels
     {
         public Employee Employee { get; set; }
 
-        public List<Employee> Employees {get;set;}
-
         public Computer Computer { get; set; }
 
         public List<TrainingProgram> TrainingPrograms { get; set; }

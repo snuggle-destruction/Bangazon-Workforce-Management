@@ -31,7 +31,9 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         public ActionResult Index()
         {
 
-            List<Employee> employees = new List<Employee>();
+            
+
+            List<EmployeeDisplayViewModel> models = new List<EmployeeDisplayViewModel>();
 
             using (SqlConnection conn = Connection)
             {
@@ -49,21 +51,28 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                     while (reader.Read())
                     {
-                        employees.Add(new Employee()
+                        var viewModel = new EmployeeDisplayViewModel();
+                        var employee = new Employee()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                             IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
-                        });
+                        };
+                        viewModel.Employee = employee;
+                        var department = GetDepartment(reader.GetInt32(reader.GetOrdinal("Id")));
+                        viewModel.Department = department;
+                        models.Add(viewModel);
                     }
+
+
 
                     reader.Close();
                 }
             }
 
-            return View(employees);
+            return View(models);
         }
 
         // GET: Employees/Details/5
