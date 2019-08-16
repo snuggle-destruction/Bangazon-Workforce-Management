@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using SnuggleDestructionBangazonWorkforce.Models;
 using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
@@ -41,8 +42,9 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, FirstName, LastName, DepartmentId, IsSupervisor
-                        FROM Employee
+                        SELECT e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSupervisor, d.Name, d.Id As DeptId, d.Budget
+                        FROM Employee e
+                        LEFT JOIN Department d ON d.Id = e.DepartmentId
                         ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -60,8 +62,13 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                             DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                             IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
                         };
+                        var department = new Department()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("DeptId")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                        };
                         viewModel.Employee = employee;
-                        var department = GetDepartment(reader.GetInt32(reader.GetOrdinal("Id")));
                         viewModel.Department = department;
                         models.Add(viewModel);
                     }
@@ -95,17 +102,61 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Employees/Create
         public ActionResult Create()
         {
-            return View();
+            var viewModel = new EmployeeCreateViewModel();
+            var departments = GetDepartments();
+            var selectItems = departments
+                .Select(department => new SelectListItem
+                {
+                    Text = department.Name,
+                    Value = department.Id.ToString()
+                })
+                .ToList();
+
+            selectItems.Insert(0, new SelectListItem
+            {
+                Text = "Choose cohort...",
+                Value = "0"
+            });
+            viewModel.Departments = selectItems;
+
+            return View(viewModel);
         }
 
         // POST: Employees/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Employee employee)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                                   INSERT INTO Employee (
+                                   FirstName,
+                                   LastName,
+                                   IsSupervisor,
+                                   DepartmentId
+                                  )  Values (
+                                    @firstName,
+                                    @lastName,
+                                    @isSupervisor,
+                                    @departmentId
+                                   )
+                                ";
+
+                        cmd.Parameters.AddWithValue("@firstName", employee.FirstName);
+                        cmd.Parameters.AddWithValue("@lastName", employee.LastName);
+                        cmd.Parameters.AddWithValue("@isSupervisor", employee.IsSupervisor);
+                        cmd.Parameters.AddWithValue("@departmentId", employee.DepartmentId);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
@@ -313,6 +364,41 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
 
             return (department);
+        }
+
+        private List<Department> GetDepartments()
+        {
+            List<Department> departments = new List<Department>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, [Name], Budget
+                        FROM Department
+                        ";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+
+
+                    while (reader.Read())
+                    {
+                        departments.Add(new Department()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                        });
+                    }
+
+                    reader.Close();
+                }
+            }
+
+            return (departments);
         }
     }
 }
