@@ -169,22 +169,93 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Employees/Edit/5
         public ActionResult Edit(int id)
         {
+            var viewModel = new EmployeeEditViewModel();
             var employee = GetOneEmplyee(id);
-            return View();
+            var departments = GetDepartments();
+            var eComputer = GetComputer(id);
+            var deptSelectItems = departments
+                .Select(department => new SelectListItem
+                {
+                    Text = department.Name,
+                    Value = department.Id.ToString()
+                })
+                .ToList();
+
+            deptSelectItems.Insert(0, new SelectListItem
+            {
+                Text = "Choose department...",
+                Value = "0"
+            });
+            var computers = GetComputers();
+            var compSelectItems = computers
+                .Select(computer => new SelectListItem
+                {
+                    Text = computer.Make,
+                    Value = computer.Id.ToString()
+                })
+                .ToList();
+
+            compSelectItems.Insert(0, new SelectListItem
+            {
+                Text = "Choose computer...",
+                Value = "0"
+            });
+
+            viewModel.Computer = eComputer;
+            viewModel.Employee = employee;
+            viewModel.Departments = deptSelectItems;
+            viewModel.Computers = compSelectItems;
+
+            return View(viewModel);
         }
 
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, EmployeeEditViewModel model)
         {
             try
             {
-                // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                                   UPDATE Employee 
+                                    SET FirstName = @firstName,
+                                        LastName = @lastName,
+                                        IsSupervisor = @isSupervisor,
+                                        DepartmentId = @departmentId
+                                    WHERE Id = @id
+
+                                    UPDATE ComputerEmployee
+                                    Set EmployeeId = @id,
+                                        ComputerId = @computerId,
+                                        AssignDate = @assignDate,
+                                        UnassignDate = @unassignDate
+                                    WHERE EmployeeId = @id
+                                    ";
+
+                                    
+
+                        cmd.Parameters.AddWithValue("@id", id);
+                        cmd.Parameters.AddWithValue("@firstName", model.Employee.FirstName);
+                        cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
+                        cmd.Parameters.AddWithValue("@isSupervisor", model.Employee.IsSupervisor);
+                        cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
+                        cmd.Parameters.AddWithValue("@computerId", model.Computer.Id);
+                        cmd.Parameters.AddWithValue("@assignDate", model.Computer.PurchaseDate);
+                        cmd.Parameters.AddWithValue("@unassignDate", model.Computer.DecomissionDate);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch(Exception ex)
             {
                 return View();
             }
@@ -400,6 +471,43 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
 
             return (departments);
+        }
+
+        private List<Computer> GetComputers()
+        {
+            List<Computer> computers = new List<Computer>();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
+                        FROM Computer
+                    ";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Computer computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        };
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+
+                        computers.Add(computer);
+                    }
+                    reader.Close();
+                }
+            }
+            return (computers);
         }
     }
 }
