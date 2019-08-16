@@ -41,7 +41,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                         SELECT d.Id, d.Name, d.Budget, COUNT(e.DepartmentId) AS DepartmentSize
                                           FROM Department AS d
                                           LEFT JOIN Employee AS e ON d.Id = e.DepartmentId
-                                          ";
+                                          GROUP BY d.Id, d.Name, d.Budget ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -53,7 +53,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                            DepartmentSize = reader.GetInt32(reader.GetOrdinal("DepartmentSize"))
                         });
                     }
 
