@@ -110,7 +110,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // POST: Departments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Department department)
+        public ActionResult Create(DepartmentCreateViewModel model)
         {
             try
             {
@@ -126,8 +126,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                                             VALUES
                                             (@Name, @Budget)";
 
-                        cmd.Parameters.AddWithValue("@Name", department.Name);
-                        cmd.Parameters.AddWithValue("@Budget", department.Budget);
+                        cmd.Parameters.AddWithValue("@Name", model.Department.Name);
+                        cmd.Parameters.AddWithValue("@Budget", model.Department.Budget);
 
                         cmd.ExecuteNonQuery();
                     }
