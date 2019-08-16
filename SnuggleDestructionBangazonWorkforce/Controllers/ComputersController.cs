@@ -145,17 +145,29 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Computers/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var computer = GetComputerById(id);
+            return View(computer);
         }
 
         // POST: Computers/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Computer computer)
         {
             try
             {
-                // TODO: Add delete logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                        DELETE FROM Computer
+                        WHERE Id = @id
+                    ";
+                        cmd.Parameters.AddWithValue("@id", id);
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
