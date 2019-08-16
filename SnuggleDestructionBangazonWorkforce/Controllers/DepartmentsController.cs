@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -49,7 +48,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                     while (reader.Read())
                     {
-                        departments.Add(new Department()
+                        departments.Add(new DepartmentDisplayViewModel()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
