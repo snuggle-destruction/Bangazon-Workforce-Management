@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SnuggleDestructionBangazonWorkforce.Models;
+using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
+
 
 namespace SnuggleDestructionBangazonWorkforce.Controllers
 {
@@ -67,7 +69,10 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         public ActionResult Details(int id)
         {
             var trainingProgram = GetSingleTrainingProgram(id);
-            return View(trainingProgram);
+            var employees = GetAllEmployeesInProgram(id);
+            var viewModel = new TrainingProgramDetailsViewModel(trainingProgram, employees);
+
+            return View(viewModel);
         }
 
         // GET: TrainingPrograms/Create
@@ -114,7 +119,18 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: TrainingPrograms/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var trainingProgram = GetSingleTrainingProgram(id);
+
+            if (trainingProgram.StartDate > DateTime.Now)
+            {
+                return View(trainingProgram);
+            }
+            else
+            {
+                throw new Exception("NOPE!");
+            }
+
+            
         }
 
         // POST: TrainingPrograms/Edit/5
@@ -189,6 +205,41 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 }
             }
             return trainingProgram;
+        }
+
+        private List<Employee> GetAllEmployeesInProgram(int id)
+        {
+            List<Employee> employees = new List<Employee>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                                        SELECT e.Id, e.FirstName, e.LastName FROM Employee e
+                                        JOIN EmployeeTraining et ON et.EmployeeId = e.Id
+                                        JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
+                                        WHERE tp.Id = 5
+                                        ORDER BY e.Id ASC;
+                                        ";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        employees.Add(new Employee()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName"))
+                        });
+                    }
+
+                    reader.Close();
+                }
+            }
+            return employees;
         }
     }
 }
