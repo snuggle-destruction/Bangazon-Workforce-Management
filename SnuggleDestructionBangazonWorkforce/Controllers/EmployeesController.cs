@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using SnuggleDestructionBangazonWorkforce.Models;
 using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
@@ -95,7 +96,24 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Employees/Create
         public ActionResult Create()
         {
-            return View();
+            var viewModel = new EmployeeCreateViewModel();
+            var departments = GetDepartments();
+            var selectItems = departments
+                .Select(department => new SelectListItem
+                {
+                    Text = department.Name,
+                    Value = department.Id.ToString()
+                })
+                .ToList();
+
+            selectItems.Insert(0, new SelectListItem
+            {
+                Text = "Choose cohort...",
+                Value = "0"
+            });
+            viewModel.Departments = selectItems;
+
+            return View(viewModel);
         }
 
         // POST: Employees/Create
@@ -313,6 +331,41 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
 
             return (department);
+        }
+
+        private List<Department> GetDepartments()
+        {
+            List<Department> departments = new List<Department>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, [Name], Budget
+                        FROM Department
+                        ";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+
+
+                    while (reader.Read())
+                    {
+                        departments.Add(new Department()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                        });
+                    }
+
+                    reader.Close();
+                }
+            }
+
+            return (departments);
         }
     }
 }
