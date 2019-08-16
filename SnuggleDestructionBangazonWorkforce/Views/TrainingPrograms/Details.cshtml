@@ -1,4 +1,4 @@
-﻿@model SnuggleDestructionBangazonWorkforce.Models.TrainingProgram
+﻿@model SnuggleDestructionBangazonWorkforce.Models.ViewModels.TrainingProgramDetailsViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -7,39 +7,47 @@
 <h2>Details</h2>
 
 <div>
-    <h4>TrainingProgram</h4>
+    <h4>TrainingProgramDetailsViewModel</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Id)
+            @Html.DisplayNameFor(model => model.TrainingProgram.Id)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Id)
+            @Html.DisplayFor(model => model.TrainingProgram.Id)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.Name)
+            @Html.DisplayNameFor(model => model.TrainingProgram.Name)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Name)
+            @Html.DisplayFor(model => model.TrainingProgram.Name)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.StartDate)
+            @Html.DisplayNameFor(model => model.TrainingProgram.StartDate)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.StartDate)
+            @Html.DisplayFor(model => model.TrainingProgram.StartDate)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.EndDate)
+            @Html.DisplayNameFor(model => model.TrainingProgram.EndDate)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.EndDate)
+            @Html.DisplayFor(model => model.TrainingProgram.EndDate)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.MaxAttendees)
+            @Html.DisplayNameFor(model => model.TrainingProgram.MaxAttendees)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.MaxAttendees)
+            @Html.DisplayFor(model => model.TrainingProgram.MaxAttendees)
         </dd>
+    </dl>
+    <h4>TrainingProgramDetailsViewModel</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            
+        </dt>
+
     </dl>
 </div>
 <div>

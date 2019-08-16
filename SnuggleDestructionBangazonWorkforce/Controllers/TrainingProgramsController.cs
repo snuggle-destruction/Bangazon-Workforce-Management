@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SnuggleDestructionBangazonWorkforce.Models;
+using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
+
 
 namespace SnuggleDestructionBangazonWorkforce.Controllers
 {
@@ -67,7 +69,10 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         public ActionResult Details(int id)
         {
             var trainingProgram = GetSingleTrainingProgram(id);
-            return View(trainingProgram);
+            var employees = GetAllEmployees();
+            var viewModel = new TrainingProgramDetailsViewModel(trainingProgram, employees);
+
+            return View(viewModel);
         }
 
         // GET: TrainingPrograms/Create
@@ -189,6 +194,37 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 }
             }
             return trainingProgram;
+        }
+
+        private List<Employee> GetAllEmployees()
+        {
+            List<Employee> employees = new List<Employee>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                                        SELECT Id, FullName FROM Employee;
+                                        ";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        employees.Add(new Employee()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName"))
+                        });
+                    }
+
+                    reader.Close();
+                }
+            }
+            return employees;
         }
     }
 }
