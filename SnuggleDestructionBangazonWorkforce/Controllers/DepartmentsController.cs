@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SnuggleDestructionBangazonWorkforce.Models;
+using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
 
 namespace SnuggleDestructionBangazonWorkforce.Controllers
 {
@@ -29,7 +30,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Departments
         public ActionResult Index()
         {
-            List<Department> departments = new List<Department>();
+            List<DepartmentDisplayViewModel> departments = new List<DepartmentDisplayViewModel>();
 
             using (SqlConnection conn = Connection)
             {
@@ -37,9 +38,10 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, Name, Budget
-                        FROM Department
-                        ";
+                        SELECT d.Id, d.Name, d.Budget, COUNT(e.DepartmentId) AS DepartmentSize
+                                          FROM Department AS d
+                                          LEFT JOIN Employee AS e ON d.Id = e.DepartmentId
+                                          GROUP BY d.Id, d.Name, d.Budget ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -47,11 +49,12 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                     while (reader.Read())
                     {
-                        departments.Add(new Department()
+                        departments.Add(new DepartmentDisplayViewModel()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                            DepartmentSize = reader.GetInt32(reader.GetOrdinal("DepartmentSize"))
                         });
                     }
 
@@ -65,7 +68,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Departments/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            Department department = GetOneDepartment(id);
+            return View(department);
         }
 
         // GET: Departments/Create
@@ -137,40 +141,36 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
         }
 
-        private Department GetOneDepartment()
+        private Department GetOneDepartment(int id)
         {
-            Department department = null;
-
             using (SqlConnection conn = Connection)
             {
+                Department department = null;
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
                         SELECT Id, Name, Budget
                         FROM Department
-                        WHERE Id
-                        ";
+                        WHERE Id = @id
+                    ";
 
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
-
-
-                    while (reader.Read())
+                    if (reader.Read())
                     {
-                        department = new Department
+                        department = new Department()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                           
                         };
                     }
-
-                    reader.Close();
                 }
+                return department;
             }
-
-            return (department);
         }
     }
 }
