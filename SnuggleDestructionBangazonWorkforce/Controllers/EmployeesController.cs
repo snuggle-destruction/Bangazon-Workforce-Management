@@ -217,6 +217,10 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         public ActionResult TrainingProgramsForm(int id)
         {
             var viewModel = new EmployeeTrainingProgramViewModel();
+            var employee = GetOneEmplyee(id);
+            var department = GetDepartment(id);
+            viewModel.Employee = employee;
+            viewModel.Department = department;
             viewModel.TrainingProgramList = trainingList(id);
             return View(viewModel);
         }

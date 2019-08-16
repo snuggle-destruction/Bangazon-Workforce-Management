@@ -9,9 +9,8 @@ namespace SnuggleDestructionBangazonWorkforce.Models.ViewModels
     public class EmployeeTrainingProgramViewModel
     {
         public List<SelectListItem> TrainingProgramList { get; set; }
-
         public TrainingProgram TrainingProgram { get; set; }
         public Employee Employee { get; set; }
-
+        public Department Department { get; set; }
     }
 }

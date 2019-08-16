@@ -6,7 +6,7 @@
 
 <h2>Training Programs</h2>
 
-<h4>Assign Training Programs</h4>
+<h4>Assign a Training Program</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -16,6 +16,12 @@
             </dt>
             <dd>
                 @Html.DisplayFor(model => model.Employee.FullName)
+            </dd>
+            <dt>
+                Department
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Department.Name)
             </dd>
         </dl>
         <form asp-action="TrainingProgramsForm">
