@@ -221,7 +221,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             var department = GetDepartment(id);
             viewModel.Employee = employee;
             viewModel.Department = department;
-            viewModel.TrainingProgramList = trainingList(id);
+            viewModel.TrainingProgramList = trainingList();
             return View(viewModel);
         }
 
@@ -239,18 +239,11 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"DECLARE @trainingProgramId int = 0;
-
-                                        SELECT TOP 1 @trainingProgramId = tp.Id 
-                                        FROM TrainingProgram tp 
-                                        WHERE tp.Name = @trainingProgramName
-                                        IF @trainingProgramId > 0
+                    cmd.CommandText = @"IF @trainingProgramId > 0
                                         BEGIN
 
                                         INSERT INTO EmployeeTraining (TrainingProgramId, EmployeeId)
-                                        SELECT @trainingProgramId, e.Id 
-                                        FROM Employee e
-                                        WHERE e.Id = @employeeId
+                                        Values(@trainingProgramId, @employeeId)
 
                                         END";
 
@@ -263,7 +256,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 }
             }
 
-            return View(employees);
+            return RedirectToAction(nameof(Index));
         }
 
         private Employee GetOneEmplyee(int id)
@@ -455,9 +448,43 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             return (departments);
         }
 
-        private List<SelectListItem> trainingList(int id)
+        private List<TrainingProgram> GetAllTrainingPrograms()
         {
-            var trainingProgram = GetTrainingPrograms(id);
+            List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT Id, EndDate, MaxAttendees, Name, StartDate 
+                                        FROM TrainingProgram";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        trainingPrograms.Add(new TrainingProgram()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
+                        });
+                    }
+
+                    reader.Close();
+                }
+            }
+
+            return (trainingPrograms);
+        }
+
+
+        private List<SelectListItem> trainingList()
+        {
+            var trainingProgram = GetAllTrainingPrograms();
             var selectItems = trainingProgram
                 .Select(program => new SelectListItem
                 {
