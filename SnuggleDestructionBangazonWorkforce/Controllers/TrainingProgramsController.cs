@@ -40,9 +40,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 {
                     cmd.CommandText = @"
                         SELECT Id, [Name], StartDate, EndDate, MaxAttendees
-                        FROM TrainingProgram
-                        WHERE StartDate > CURRENT_TIMESTAMP
-                        ";
+                        FROM TrainingProgram";
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
