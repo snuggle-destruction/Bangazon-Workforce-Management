@@ -256,7 +256,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 }
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("details", new { id = employee.Id });
         }
 
         private Employee GetOneEmplyee(int id)
