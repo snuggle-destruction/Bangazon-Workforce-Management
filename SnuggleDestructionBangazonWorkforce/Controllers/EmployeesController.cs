@@ -221,7 +221,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             var department = GetDepartment(id);
             viewModel.Employee = employee;
             viewModel.Department = department;
-            viewModel.TrainingProgramList = trainingList();
+            viewModel.TrainingProgramList = trainingList(id);
             return View(viewModel);
         }
 
@@ -448,7 +448,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             return (departments);
         }
 
-        private List<TrainingProgram> GetAllTrainingPrograms()
+        private List<TrainingProgram> GetAllTrainingPrograms(int employeeId = 0)
         {
             List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
 
@@ -457,8 +457,21 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT Id, EndDate, MaxAttendees, Name, StartDate 
-                                        FROM TrainingProgram";
+                    cmd.CommandText = @"SELECT tp.Id, tp.EndDate, tp.MaxAttendees, tp.Name, tp.StartDate 
+                                        FROM TrainingProgram tp
+                                        WHERE (
+                                        SELECT COUNT(1) 
+                                        FROM EmployeeTraining et
+                                        WHERE et.TrainingProgramId = tp.Id) < tp.MaxAttendees
+                                        AND tp.StartDate > GetDate()";
+                    if(employeeId > 0)
+                    {
+                        cmd.CommandText += @" AND tp.Id NOT IN (
+                                           SELECT TrainingProgramId
+                                           FROM EmployeeTraining
+                                           WHERE EmployeeId = @employeeId)";
+                        cmd.Parameters.AddWithValue("@employeeid", employeeId);
+                    }
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -482,9 +495,9 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         }
 
 
-        private List<SelectListItem> trainingList()
+        private List<SelectListItem> trainingList(int employeeId = 0)
         {
-            var trainingProgram = GetAllTrainingPrograms();
+            var trainingProgram = GetAllTrainingPrograms(employeeId);
             var selectItems = trainingProgram
                 .Select(program => new SelectListItem
                 {
