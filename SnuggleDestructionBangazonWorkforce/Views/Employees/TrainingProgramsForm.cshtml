@@ -1,0 +1,49 @@
+﻿@model SnuggleDestructionBangazonWorkforce.Models.ViewModels.EmployeeTrainingProgramViewModel
+
+@{
+    ViewData["Title"] = "TrainingProgramsForm";
+}
+
+<h2>Training Programs</h2>
+
+<h4>Assign a Training Program</h4>
+<hr />
+
+@using (Html.BeginForm("AssignTrainingProgram", "Employees", FormMethod.Post))
+{
+    @Html.HiddenFor(model => model.Employee.Id)
+    <div class="row">
+        <div class="col-md-4">
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Employee.FullName)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Employee.FullName)
+                </dd>
+                <dt>
+                    Department
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Department.Name)
+                </dd>
+                <dt>
+                    <label class="control-label">Training Programs</label>
+                </dt>
+                <dd>
+                    @Html.DropDownListFor(model => model.TrainingProgram.Id, Model.TrainingProgramList)
+                    <span asp-validation-for="TrainingProgram.Id" class="text-danger"></span>
+                </dd>
+            </dl>
+            <input type="submit" value="Add" />
+        </div>
+    </div>
+}
+
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
