@@ -32,7 +32,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         public ActionResult Index()
         {
 
-           
+
             List<Employee> employees = new List<Employee>();
 
             using (SqlConnection conn = Connection)
@@ -232,7 +232,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                                     WHERE EmployeeId = @id
                                     ";
 
-                                    
+
 
                         cmd.Parameters.AddWithValue("@id", id);
                         cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
@@ -245,7 +245,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return View();
             }
@@ -520,7 +520,11 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 {
                     cmd.CommandText = @"
                         SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
-                        FROM Computer
+                            FROM Computer
+                            WHERE Id NOT IN (
+                                SELECT ComputerId
+                                FROM ComputerEmployee
+                            )
                     ";
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -540,6 +544,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                         }
 
                         computers.Add(computer);
+
                     }
                     reader.Close();
                 }
