@@ -110,7 +110,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
             selectItems.Insert(0, new SelectListItem
             {
-                Text = "Choose cohort...",
+                Text = "Choose department...",
                 Value = "0"
             });
             viewModel.Departments = selectItems;
@@ -156,7 +156,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch(Exception ex)
             {
                 return View();
             }
@@ -198,6 +198,9 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                     Text = "Choose computer...",
                     Value = eComputer.Id.ToString()
                 });
+            } else
+            {
+
             }
 
             viewModel.Computer = eComputer;
@@ -221,7 +224,9 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"
+                        if (model.Computer != null)
+                        {
+                            cmd.CommandText = @"
                                    UPDATE Employee 
                                     SET LastName = @lastName,
                                         DepartmentId = @departmentId
@@ -234,13 +239,27 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                                         UnassignDate = null
                                     WHERE EmployeeId = @id
                                     ";
+                            cmd.Parameters.AddWithValue("@id", id);
+                            cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
+                            cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
+                            cmd.Parameters.AddWithValue("@computerId", model.Computer.Id);
+                        }
+                        else
+                        {
+                            cmd.CommandText = @"
+                                   UPDATE Employee 
+                                    SET LastName = @lastName,
+                                        DepartmentId = @departmentId
+                                    WHERE Id = @id
+                                     ";
+                            cmd.Parameters.AddWithValue("@id", id);
+                            cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
+                            cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
+                        }
 
 
 
-                        cmd.Parameters.AddWithValue("@id", id);
-                        cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
-                        cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
-                        cmd.Parameters.AddWithValue("@computerId", model.Computer.Id);
+                        
 
                         cmd.ExecuteNonQuery();
                     }

@@ -21,6 +21,7 @@ namespace SnuggleDestructionBangazonWorkforce.Models
         public string LastName { get; set; }
 
         [Required]
+        [Range(1,100, ErrorMessage = "Please select a department")]
         [Display(Name = "Department Id")]
         public int DepartmentId { get; set; }
 
