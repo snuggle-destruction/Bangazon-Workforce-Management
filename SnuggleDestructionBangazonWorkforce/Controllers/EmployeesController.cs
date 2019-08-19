@@ -191,11 +191,14 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 })
                 .ToList();
 
-            compSelectItems.Insert(0, new SelectListItem
+            if (eComputer != null)
             {
-                Text = "Choose computer...",
-                Value = "0"
-            });
+                compSelectItems.Insert(0, new SelectListItem
+                {
+                    Text = "Choose computer...",
+                    Value = eComputer.Id.ToString()
+                });
+            }
 
             viewModel.Computer = eComputer;
             viewModel.Employee = employee;
