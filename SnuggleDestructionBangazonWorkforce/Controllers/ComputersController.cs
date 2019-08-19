@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SnuggleDestructionBangazonWorkforce.Models;
+using SnuggleDestructionBangazonWorkforce.Models.ViewModels;
 
 namespace SnuggleDestructionBangazonWorkforce.Controllers
 {
@@ -30,23 +31,26 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Computers
         public ActionResult Index()
         {
-            List<Computer> computers = new List<Computer>();
+            var computers = new List<Computer>();
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
-                        FROM Computer
+                        SELECT c.Id AS ComputerId, c.PurchaseDate, c.DecomissionDate, c.Make, c.Manufacturer, 
+                            e.Id AS EmployeeId, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor
+                        FROM Computer c
+                        LEFT JOIN ComputerEmployee ce ON c.Id = ce.ComputerId
+                        LEFT JOIN Employee e ON e.Id = ce.EmployeeId
                     ";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        Computer computer = new Computer
+                        var computer = new Computer
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                             PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
                             Make = reader.GetString(reader.GetOrdinal("Make")),
                             Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
@@ -55,6 +59,22 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                         if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
                         {
                             computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
+                        {
+                            computer.EmployeeId = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
+
+                            var employee = new Employee()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor"))
+                            };
+
+                            computer.Employee = employee;
                         }
 
                         computers.Add(computer);
@@ -75,7 +95,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Computers/Create
         public ActionResult Create()
         {
-            return View();
+            var viewModel = new ComputerCreateViewModel(_config.GetConnectionString("DefaultConnection"));
+            return View(viewModel);
         }
 
         // POST: Computers/Create
@@ -91,21 +112,41 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"
+
+                       cmd.CommandText = @"
+                            DECLARE @OutputTbl TABLE (ComputerId INT)
+                            DECLARE @ComputerId int;
+                            
                             INSERT INTO Computer (
                                 PurchaseDate,
                                 Make,
                                 Manufacturer
-                            ) VALUES (
+                            ) OUTPUT Inserted.Id INTO @OutputTbl(ComputerId)
+                            VALUES
+                            (
                                 @PurchaseDate,
                                 @Make,
                                 @Manufacturer
-                            )
+                            );
+
+                            SET @ComputerId = (SELECT ComputerId FROM @OutputTbl);
+
+                            INSERT INTO ComputerEmployee (
+                                ComputerId,
+                                EmployeeId,
+                                AssignDate
+                            ) VALUES (
+                                @ComputerId,
+                                @EmployeeId,
+                                @AssignDate
+                            );
                         ";
 
                         cmd.Parameters.AddWithValue("@PurchaseDate", computer.PurchaseDate);
                         cmd.Parameters.AddWithValue("@Make", computer.Make);
                         cmd.Parameters.AddWithValue("@Manufacturer", computer.Manufacturer);
+                        cmd.Parameters.AddWithValue("@EmployeeId", computer.EmployeeId);
+                        cmd.Parameters.AddWithValue("@AssignDate", DateTime.Today);
 
                         cmd.ExecuteNonQuery();
                     }
@@ -145,19 +186,35 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Computers/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var computer = GetComputerById(id);
+            return View(computer);
         }
 
         // POST: Computers/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(Computer computer)
         {
             try
             {
-                // TODO: Add delete logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                        DELETE FROM Computer
+                        WHERE Id = @id
+                    ";
+
+                        cmd.Parameters.AddWithValue("@id", computer.Id);
+                        cmd.ExecuteNonQuery();
+
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
+
             }
             catch
             {

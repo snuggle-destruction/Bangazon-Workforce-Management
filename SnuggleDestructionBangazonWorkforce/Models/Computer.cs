@@ -24,5 +24,8 @@ namespace SnuggleDestructionBangazonWorkforce.Models
 
         [Required]
         public string Manufacturer { get; set; }
+        public int EmployeeId { get; set; }
+        [Display(Name = "Assigned Employee")]
+        public Employee Employee { get; set; }
     }
 }

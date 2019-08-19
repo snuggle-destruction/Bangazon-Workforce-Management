@@ -28,6 +28,9 @@
                 @Html.DisplayNameFor(model => model.DecomissionDate)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.Employee)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Make)
             </th>
             <th>
@@ -50,15 +53,19 @@
                 @(item.DecomissionDate == default(DateTime) ? "Active" : item.DecomissionDate.ToShortDateString())
             </td>
             <td>
+                @*@Html.DisplayFor(modelItem => item.Employee)*@
+                @(item.Employee == null ? "No Assigned Employee" : item.Employee.FullName)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Make)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Manufacturer)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-                @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+
+                @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
             </td>
         </tr>
 }
