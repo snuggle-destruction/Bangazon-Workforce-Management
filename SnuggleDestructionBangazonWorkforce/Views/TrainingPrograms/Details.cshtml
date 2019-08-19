@@ -1,4 +1,4 @@
-﻿@model SnuggleDestructionBangazonWorkforce.Models.ViewModels.TrainingProgramDetailsViewModel
+﻿@model SnuggleDestructionBangazonWorkforce.Models.TrainingProgram
 
 @{
     ViewData["Title"] = "Details";
@@ -11,34 +11,34 @@
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.TrainingProgram.Id)
+            @Html.DisplayNameFor(model => model.Id)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.TrainingProgram.Id)
+            @Html.DisplayFor(model => model.Id)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.TrainingProgram.Name)
+            @Html.DisplayNameFor(model => model.Name)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.TrainingProgram.Name)
+            @Html.DisplayFor(model => model.Name)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.TrainingProgram.StartDate)
+            @Html.DisplayNameFor(model => model.StartDate)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.TrainingProgram.StartDate)
+            @Html.DisplayFor(model => model.StartDate)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.TrainingProgram.EndDate)
+            @Html.DisplayNameFor(model => model.EndDate)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.TrainingProgram.EndDate)
+            @Html.DisplayFor(model => model.EndDate)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.TrainingProgram.MaxAttendees)
+            @Html.DisplayNameFor(model => model.MaxAttendees)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.TrainingProgram.MaxAttendees)
+            @Html.DisplayFor(model => model.MaxAttendees)
         </dd>
     </dl>
     <hr />
@@ -63,6 +63,6 @@
     </table>
 </div>
 <div>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.TrainingProgram.Id }) |
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
     <a asp-action="Index">Back to List</a>
 </div>
