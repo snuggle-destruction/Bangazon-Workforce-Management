@@ -25,10 +25,10 @@
                 @Html.DisplayNameFor(model => model.PurchaseDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Employee)
+                @Html.DisplayNameFor(model => model.DecomissionDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DecomissionDate)
+                @Html.DisplayNameFor(model => model.Employee)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Make)
@@ -53,14 +53,14 @@
                 @(item.DecomissionDate == default(DateTime) ? "Active" : item.DecomissionDate.ToShortDateString())
             </td>
             <td>
+                @*@Html.DisplayFor(modelItem => item.Employee)*@
+                @(item.Employee == null ? "No Assigned Employee" : item.Employee.FullName)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Make)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Manufacturer)
-            </td>
-            <td>
-                @*@Html.DisplayFor(modelItem => item.Employee.FullName)*@
-                @(item.Employee.FullName == default(string) ? "No Assigned Employee" : item.Employee.FullName)
             </td>
             <td>
 

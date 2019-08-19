@@ -112,21 +112,41 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"
+
+                       cmd.CommandText = @"
+                            DECLARE @OutputTbl TABLE (ComputerId INT)
+                            DECLARE @ComputerId int;
+                            
                             INSERT INTO Computer (
                                 PurchaseDate,
                                 Make,
                                 Manufacturer
-                            ) VALUES (
+                            ) OUTPUT Inserted.Id INTO @OutputTbl(ComputerId)
+                            VALUES
+                            (
                                 @PurchaseDate,
                                 @Make,
                                 @Manufacturer
-                            )
+                            );
+
+                            SET @ComputerId = (SELECT ComputerId FROM @OutputTbl);
+
+                            INSERT INTO ComputerEmployee (
+                                ComputerId,
+                                EmployeeId,
+                                AssignDate
+                            ) VALUES (
+                                @ComputerId,
+                                @EmployeeId,
+                                @AssignDate
+                            );
                         ";
 
                         cmd.Parameters.AddWithValue("@PurchaseDate", computer.PurchaseDate);
                         cmd.Parameters.AddWithValue("@Make", computer.Make);
                         cmd.Parameters.AddWithValue("@Manufacturer", computer.Manufacturer);
+                        cmd.Parameters.AddWithValue("@EmployeeId", computer.EmployeeId);
+                        cmd.Parameters.AddWithValue("@AssignDate", DateTime.Today);
 
                         cmd.ExecuteNonQuery();
                     }
