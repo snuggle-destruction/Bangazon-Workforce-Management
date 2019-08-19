@@ -80,11 +80,12 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                     cmd.Parameters.AddWithValue("@id", id);
 
                     SqlDataReader reader = cmd.ExecuteReader();
-                    Department department = new Department();
+                    Department department = null;
                     List<Employee> employees = new List<Employee>();
 
                     while (reader.Read())
                     {
+                        if (department == null)
                         {
                             department = new Department
                             {
@@ -92,6 +93,9 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                                 Name = reader.GetString(reader.GetOrdinal("Name")),
                                 Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
                             };
+                        }
+                        if (!reader.IsDBNull(reader.GetOrdinal("FirstName")))
+                        {
                             employees.Add(new Employee()
                             {
                                 FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
