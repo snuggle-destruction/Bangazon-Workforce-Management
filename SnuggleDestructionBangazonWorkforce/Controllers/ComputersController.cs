@@ -104,16 +104,11 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(Computer computer)
         {
-            try
+            string commandText;
+            // if an employee has been assigned to computer, this query will add an instance to the ComputerEmployeeTable
+            if (computer.EmployeeId != 0)
             {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-
-                       cmd.CommandText = @"
+                commandText = @"
                             DECLARE @OutputTbl TABLE (ComputerId INT)
                             DECLARE @ComputerId int;
                             
@@ -141,6 +136,33 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                                 @AssignDate
                             );
                         ";
+            } else
+            {
+                commandText = @"
+                                INSERT INTO Computer (
+                                    PurchaseDate,
+                                    Make,
+                                    Manufacturer
+                                )
+                                VALUES
+                                (
+                                    @PurchaseDate,
+                                    @Make,
+                                    @Manufacturer
+                                );
+                            ";
+            }
+
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+
+                        cmd.CommandText = commandText;
 
                         cmd.Parameters.AddWithValue("@PurchaseDate", computer.PurchaseDate);
                         cmd.Parameters.AddWithValue("@Make", computer.Make);
@@ -160,34 +182,18 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
         }
 
-        // GET: Computers/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: Computers/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
 
         // GET: Computers/Delete/5
         public ActionResult Delete(int id)
         {
             var computer = GetComputerById(id);
-            return View(computer);
+
+            if (computer.Employee == null)
+            {
+                return View(computer);
+            }
+
+            return View(nameof(Index));
         }
 
         // POST: Computers/Delete/5
@@ -209,7 +215,6 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                         cmd.Parameters.AddWithValue("@id", computer.Id);
                         cmd.ExecuteNonQuery();
-
                     }
                 }
 
@@ -236,19 +241,23 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
-                                        FROM Computer
-                                        WHERE Make LIKE '%' + @search + '%'
-                                        OR Manufacturer LIKE '%' + @search + '%'";
+                    cmd.CommandText = @"
+                        SELECT c.Id AS ComputerId, c.PurchaseDate, c.DecomissionDate, c.Make, c.Manufacturer, 
+                            e.Id AS EmployeeId, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor
+                        FROM Computer c
+                        LEFT JOIN ComputerEmployee ce ON c.Id = ce.ComputerId
+                        LEFT JOIN Employee e ON e.Id = ce.EmployeeId
+                        WHERE c.Make LIKE '%' + @search + '%'
+                        OR c.Manufacturer LIKE '%' + @search + '%'";
 
                     cmd.Parameters.AddWithValue("@search", search["SearchString"][0]);
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        Computer computer = new Computer
+                        var computer = new Computer
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                             PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
                             Make = reader.GetString(reader.GetOrdinal("Make")),
                             Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
@@ -257,6 +266,22 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                         if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
                         {
                             computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
+                        {
+                            computer.EmployeeId = reader.GetInt32(reader.GetOrdinal("EmployeeId"));
+
+                            var employee = new Employee()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                IsSupervisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor"))
+                            };
+
+                            computer.Employee = employee;
                         }
 
                         computers.Add(computer);
