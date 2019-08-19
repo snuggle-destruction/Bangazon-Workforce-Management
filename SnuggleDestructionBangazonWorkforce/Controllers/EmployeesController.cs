@@ -278,6 +278,53 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
         }
 
+
+        // Get Training Programs
+        public ActionResult TrainingProgramsForm(int id)
+        {
+            var viewModel = new EmployeeTrainingProgramViewModel();
+            var employee = GetOneEmplyee(id);
+            var department = GetDepartment(id);
+            viewModel.Employee = employee;
+            viewModel.Department = department;
+            viewModel.TrainingProgramList = trainingList(id);
+            return View(viewModel);
+        }
+
+        // Assign Training Program to Employee
+        // move to training program controller
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AssignTrainingProgram(Employee employee, TrainingProgram trainingProgram)
+        {
+            List<Employee> employees = new List<Employee>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"IF @trainingProgramId > 0
+                                        BEGIN
+
+                                        INSERT INTO EmployeeTraining (TrainingProgramId, EmployeeId)
+                                        Values(@trainingProgramId, @employeeId)
+
+                                        END";
+
+                    //shelley work here
+                    cmd.Parameters.Add(new SqlParameter("@trainingProgramId", trainingProgram.Id));
+                    cmd.Parameters.Add(new SqlParameter("@employeeId", employee.Id));
+
+                    cmd.ExecuteNonQuery();
+
+                }
+            }
+
+            return RedirectToAction("details", new { id = employee.Id });
+        }
+
         private Employee GetOneEmplyee(int id)
         {
             Employee employee = null;
@@ -502,6 +549,72 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 }
             }
             return (computers);
+        }
+
+        private List<TrainingProgram> GetAllTrainingPrograms(int employeeId = 0)
+        {
+            List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT tp.Id, tp.EndDate, tp.MaxAttendees, tp.Name, tp.StartDate 
+                                        FROM TrainingProgram tp
+                                        WHERE (
+                                        SELECT COUNT(1) 
+                                        FROM EmployeeTraining et
+                                        WHERE et.TrainingProgramId = tp.Id) < tp.MaxAttendees
+                                        AND tp.StartDate > GetDate()";
+                    if (employeeId > 0)
+                    {
+                        cmd.CommandText += @" AND tp.Id NOT IN (
+                                           SELECT TrainingProgramId
+                                           FROM EmployeeTraining
+                                           WHERE EmployeeId = @employeeId)";
+                        cmd.Parameters.AddWithValue("@employeeid", employeeId);
+                    }
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        trainingPrograms.Add(new TrainingProgram()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
+                        });
+                    }
+
+                    reader.Close();
+                }
+            }
+
+            return (trainingPrograms);
+        }
+
+
+        private List<SelectListItem> trainingList(int employeeId = 0)
+        {
+            var trainingProgram = GetAllTrainingPrograms(employeeId);
+            var selectItems = trainingProgram
+                .Select(program => new SelectListItem
+                {
+                    Text = program.Name,
+                    Value = program.Id.ToString()
+                })
+                .ToList();
+
+            selectItems.Insert(0, new SelectListItem
+            {
+                Text = "Choose training program...",
+                Value = "0"
+            });
+            return selectItems;
         }
     }
 }

@@ -9,6 +9,7 @@
 <div>
     <h4>Employee</h4>
     <hr />
+
     <dl class="dl-horizontal">
         <dt>
             @Html.DisplayNameFor(model => model.Employee.FullName)
@@ -71,12 +72,13 @@
                 <th>
                     @Html.DisplayNameFor(model => model.TrainingProgram.EndDate)
                 </th>
-                <th></th>
             </tr>
         </thead>
+
         <tbody>
             @foreach (var item in Model.TrainingPrograms)
-    {
+            {
+
                 <tr>
                     <td>
                         @Html.DisplayFor(modelItem => item.Id)
@@ -98,7 +100,13 @@
     {
         <p>No Training Programs</p>
     }
+
+    <div>
+    <a asp-controller="Employees" asp-action="TrainingProgramsForm" asp-route-id="@Model.Employee.Id">Add to Training Program</a>
+    </div>
+>>>>>>> master
 </div>
+<br />
 <div>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Employee.Id }) |
     <a asp-action="Index">Back to List</a>
