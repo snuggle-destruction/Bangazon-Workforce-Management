@@ -25,6 +25,5 @@ namespace SnuggleDestructionBangazonWorkforce.Models
         public int DepartmentSize { get; set; }
 
         public List<Employee> Employees { get; set; }
-
     }
 }
