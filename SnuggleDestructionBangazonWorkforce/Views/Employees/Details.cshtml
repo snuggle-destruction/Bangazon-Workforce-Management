@@ -1,4 +1,4 @@
-﻿@model SnuggleDestructionBangazonWorkforce.Models.ViewModels.EmployeeDisplayViewModel
+﻿@model SnuggleDestructionBangazonWorkforce.Models.Employee
 
 @{
     ViewData["Title"] = "Details";
@@ -12,10 +12,10 @@
 
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Employee.FullName)
+            @Html.DisplayNameFor(model => model.FullName)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Employee.FullName)
+            @Html.DisplayFor(model => model.FullName)
         </dd>
         <dt>
             Department
@@ -24,28 +24,37 @@
             @Html.DisplayFor(model => model.Department.Name)
         </dd>
     </dl>
-    <h4>Computer</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Computer.Id)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Computer.Id)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Computer.Manufacturer)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Computer.Manufacturer)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Computer.Make)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Computer.Make)
-        </dd>
-    </dl>
+    @if ( Model.Computer != null)
+    {
+        <h4>Computer</h4>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.Computer.Id)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Computer.Id)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Computer.Manufacturer)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Computer.Manufacturer)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Computer.Make)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Computer.Make)
+            </dd>
+        </dl>
+    }
+    else
+    {
+        <p>No Computer Assigned</p>
+    }
+    @if (Model.TrainingPrograms.Count > 0)
+    {
     <h4>Training Programs</h4>
     <hr />
     <table class="table">
@@ -69,6 +78,7 @@
         <tbody>
             @foreach (var item in Model.TrainingPrograms)
             {
+
                 <tr>
                     <td>
                         @Html.DisplayFor(modelItem => item.Id)
@@ -83,16 +93,20 @@
                         @Html.DisplayFor(modelItem => item.EndDate)
                     </td>
                 </tr>
-            }
+    }
         </tbody>
     </table>
+    } else
+    {
+        <p>No Training Programs</p>
+    }
 
     <div>
-    <a asp-controller="Employees" asp-action="TrainingProgramsForm" asp-route-id="@Model.Employee.Id">Add to Training Program</a>
+    <a asp-controller="Employees" asp-action="TrainingProgramsForm" asp-route-id="@Model.Id">Add to Training Program</a>
     </div>
 </div>
 <br />
 <div>
-    @Html.ActionLink("Edit", "Edit", new {  id = Model.Employee.Id }) |
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
     <a asp-action="Index">Back to List</a>
 </div>
