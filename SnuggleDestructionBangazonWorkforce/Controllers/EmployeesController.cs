@@ -32,9 +32,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         public ActionResult Index()
         {
 
-            
 
-            List<EmployeeDisplayViewModel> models = new List<EmployeeDisplayViewModel>();
+            List<Employee> employees = new List<Employee>();
 
             using (SqlConnection conn = Connection)
             {
@@ -53,7 +52,6 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                     while (reader.Read())
                     {
-                        var viewModel = new EmployeeDisplayViewModel();
                         var employee = new Employee()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -68,9 +66,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
                         };
-                        viewModel.Employee = employee;
-                        viewModel.Department = department;
-                        models.Add(viewModel);
+                        employee.Department = department;
+                        employees.Add(employee);
                     }
 
 
@@ -79,24 +76,23 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 }
             }
 
-            return View(models);
+            return View(employees);
         }
 
         // GET: Employees/Details/5
         public ActionResult Details(int id)
         {
-            var viewModel = new EmployeeDisplayViewModel();
+
 
             var employee = GetOneEmplyee(id);
             var computer = GetComputer(id);
             var trainingPrograms = GetTrainingPrograms(id);
             var department = GetDepartment(id);
-            viewModel.Employee = employee;
-            viewModel.Computer = computer;
-            viewModel.TrainingPrograms = trainingPrograms;
-            viewModel.Department = department;
+            employee.Computer = computer;
+            employee.TrainingPrograms = trainingPrograms;
+            employee.Department = department;
 
-            return View(viewModel);
+            return View(employee);
         }
 
         // GET: Employees/Create
@@ -114,7 +110,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
             selectItems.Insert(0, new SelectListItem
             {
-                Text = "Choose cohort...",
+                Text = "Choose department...",
                 Value = "0"
             });
             viewModel.Departments = selectItems;
@@ -160,7 +156,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch(Exception ex)
             {
                 return View();
             }
@@ -169,21 +165,109 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         // GET: Employees/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var viewModel = new EmployeeEditViewModel();
+            var employee = GetOneEmplyee(id);
+            var departments = GetDepartments();
+            var eComputer = GetComputer(id);
+            var deptSelectItems = departments
+                .Select(department => new SelectListItem
+                {
+                    Text = department.Name,
+                    Value = department.Id.ToString()
+                })
+                .ToList();
+
+            deptSelectItems.Insert(0, new SelectListItem
+            {
+                Text = "Choose department...",
+                Value = "0"
+            });
+            var computers = GetComputers();
+            var compSelectItems = computers
+                .Select(computer => new SelectListItem
+                {
+                    Text = computer.Make,
+                    Value = computer.Id.ToString()
+                })
+                .ToList();
+
+            if (eComputer != null)
+            {
+                compSelectItems.Insert(0, new SelectListItem
+                {
+                    Text = "Choose computer...",
+                    Value = eComputer.Id.ToString()
+                });
+            } else
+            {
+
+            }
+
+            viewModel.Computer = eComputer;
+            viewModel.Employee = employee;
+            viewModel.Departments = deptSelectItems;
+            viewModel.Computers = compSelectItems;
+
+            return View(viewModel);
         }
 
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, EmployeeEditViewModel model)
         {
             try
             {
-                // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        if (model.Computer != null)
+                        {
+                            cmd.CommandText = @"
+                                   UPDATE Employee 
+                                    SET LastName = @lastName,
+                                        DepartmentId = @departmentId
+                                    WHERE Id = @id;
+
+                                    UPDATE ComputerEmployee
+                                    Set EmployeeId = @id,
+                                        ComputerId = @computerId,
+                                        AssignDate = GETDATE(),
+                                        UnassignDate = null
+                                    WHERE EmployeeId = @id
+                                    ";
+                            cmd.Parameters.AddWithValue("@id", id);
+                            cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
+                            cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
+                            cmd.Parameters.AddWithValue("@computerId", model.Computer.Id);
+                        }
+                        else
+                        {
+                            cmd.CommandText = @"
+                                   UPDATE Employee 
+                                    SET LastName = @lastName,
+                                        DepartmentId = @departmentId
+                                    WHERE Id = @id
+                                     ";
+                            cmd.Parameters.AddWithValue("@id", id);
+                            cmd.Parameters.AddWithValue("@lastName", model.Employee.LastName);
+                            cmd.Parameters.AddWithValue("@departmentId", model.Employee.DepartmentId);
+                        }
+
+
+
+                        
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
                 return View();
             }
@@ -448,6 +532,48 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             return (departments);
         }
 
+        private List<Computer> GetComputers()
+        {
+            List<Computer> computers = new List<Computer>();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer 
+                            FROM Computer
+                            WHERE Id NOT IN (
+                                SELECT ComputerId
+                                FROM ComputerEmployee
+                            )
+                    ";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Computer computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        };
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+                            computer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+
+                        computers.Add(computer);
+
+                    }
+                    reader.Close();
+                }
+            }
+            return (computers);
+        }
+
         private List<TrainingProgram> GetAllTrainingPrograms(int employeeId = 0)
         {
             List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
@@ -464,7 +590,7 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                                         FROM EmployeeTraining et
                                         WHERE et.TrainingProgramId = tp.Id) < tp.MaxAttendees
                                         AND tp.StartDate > GetDate()";
-                    if(employeeId > 0)
+                    if (employeeId > 0)
                     {
                         cmd.CommandText += @" AND tp.Id NOT IN (
                                            SELECT TrainingProgramId
