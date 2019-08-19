@@ -1,4 +1,4 @@
-﻿@model SnuggleDestructionBangazonWorkforce.Models.ViewModels.EmployeeDisplayViewModel
+﻿@model SnuggleDestructionBangazonWorkforce.Models.Employee
 
 @{
     ViewData["Title"] = "Details";
@@ -12,10 +12,10 @@
 
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Employee.FullName)
+            @Html.DisplayNameFor(model => model.FullName)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Employee.FullName)
+            @Html.DisplayFor(model => model.FullName)
         </dd>
         <dt>
             Department
@@ -102,11 +102,11 @@
     }
 
     <div>
-    <a asp-controller="Employees" asp-action="TrainingProgramsForm" asp-route-id="@Model.Employee.Id">Add to Training Program</a>
+    <a asp-controller="Employees" asp-action="TrainingProgramsForm" asp-route-id="@Model.Id">Add to Training Program</a>
     </div>
 </div>
 <br />
 <div>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Employee.Id }) |
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
     <a asp-action="Index">Back to List</a>
 </div>

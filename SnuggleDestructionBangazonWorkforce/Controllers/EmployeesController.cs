@@ -32,9 +32,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         public ActionResult Index()
         {
 
-            
-
-            List<EmployeeDisplayViewModel> models = new List<EmployeeDisplayViewModel>();
+           
+            List<Employee> employees = new List<Employee>();
 
             using (SqlConnection conn = Connection)
             {
@@ -53,7 +52,6 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                     while (reader.Read())
                     {
-                        var viewModel = new EmployeeDisplayViewModel();
                         var employee = new Employee()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -68,9 +66,8 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
                         };
-                        viewModel.Employee = employee;
-                        viewModel.Department = department;
-                        models.Add(viewModel);
+                        employee.Department = department;
+                        employees.Add(employee);
                     }
 
 
@@ -79,24 +76,23 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                 }
             }
 
-            return View(models);
+            return View(employees);
         }
 
         // GET: Employees/Details/5
         public ActionResult Details(int id)
         {
-            var viewModel = new EmployeeDisplayViewModel();
+
 
             var employee = GetOneEmplyee(id);
             var computer = GetComputer(id);
             var trainingPrograms = GetTrainingPrograms(id);
             var department = GetDepartment(id);
-            viewModel.Employee = employee;
-            viewModel.Computer = computer;
-            viewModel.TrainingPrograms = trainingPrograms;
-            viewModel.Department = department;
+            employee.Computer = computer;
+            employee.TrainingPrograms = trainingPrograms;
+            employee.Department = department;
 
-            return View(viewModel);
+            return View(employee);
         }
 
         // GET: Employees/Create
