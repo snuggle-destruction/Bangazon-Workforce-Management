@@ -104,16 +104,11 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(Computer computer)
         {
-            try
+            string commandText;
+            // if an employee has been assigned to computer, this query will add an instance to the ComputerEmployeeTable
+            if (computer.EmployeeId != 0)
             {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-
-                       cmd.CommandText = @"
+                commandText = @"
                             DECLARE @OutputTbl TABLE (ComputerId INT)
                             DECLARE @ComputerId int;
                             
@@ -141,6 +136,33 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
                                 @AssignDate
                             );
                         ";
+            } else
+            {
+                commandText = @"
+                                INSERT INTO Computer (
+                                    PurchaseDate,
+                                    Make,
+                                    Manufacturer
+                                )
+                                VALUES
+                                (
+                                    @PurchaseDate,
+                                    @Make,
+                                    @Manufacturer
+                                );
+                            ";
+            }
+
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+
+                        cmd.CommandText = commandText;
 
                         cmd.Parameters.AddWithValue("@PurchaseDate", computer.PurchaseDate);
                         cmd.Parameters.AddWithValue("@Make", computer.Make);
@@ -160,34 +182,18 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
             }
         }
 
-        // GET: Computers/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: Computers/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
 
         // GET: Computers/Delete/5
         public ActionResult Delete(int id)
         {
             var computer = GetComputerById(id);
-            return View(computer);
+
+            if (computer.Employee == null)
+            {
+                return View(computer);
+            }
+
+            return View(nameof(Index));
         }
 
         // POST: Computers/Delete/5
@@ -209,7 +215,6 @@ namespace SnuggleDestructionBangazonWorkforce.Controllers
 
                         cmd.Parameters.AddWithValue("@id", computer.Id);
                         cmd.ExecuteNonQuery();
-
                     }
                 }
 
